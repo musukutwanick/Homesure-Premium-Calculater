@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>HomeSure Premium Calculator</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     :root {
       color-scheme: light;
@@ -31,6 +33,14 @@
       background: linear-gradient(180deg, #ffffff 0%, #f7f8fb 100%);
     }
 
+    .pdf-exporting {
+      background: #ffffff !important;
+    }
+
+    .pdf-exporting .no-print {
+      display: none !important;
+    }
+
     .sheet-shadow {
       box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
     }
@@ -41,7 +51,7 @@
   </style>
 </head>
 <body class="text-slate-900">
-  <main class="mx-auto flex w-full max-w-6xl flex-col items-center px-4 pb-4 pt-0 sm:px-6 sm:pt-0 lg:px-8 lg:pt-0">
+  <main id="pdfCapture" class="mx-auto flex w-full max-w-6xl flex-col items-center px-4 pb-4 pt-0 sm:px-6 sm:pt-0 lg:px-8 lg:pt-0">
     <section class="w-full max-w-4xl text-center">
       <div class="mb-0.5 flex flex-col items-center justify-center gap-0">
         <img src="Cellinsurance Logo.png" alt="Cell Insurance logo" class="logo-mark h-auto w-56 max-w-full sm:w-64" />
@@ -119,7 +129,7 @@
         <div class="no-print border-t border-slate-200 bg-white px-4 py-3 text-right">
           <button id="downloadBtn" type="button"
             class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-900 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-300 sm:text-sm">
-            Download
+            Download PDF
           </button>
         </div>
       </div>
@@ -240,28 +250,61 @@
         return;
       }
 
-      const quoteText = [
-        'HomeSure Premium Calculator Quote',
-        '',
-        `Buildings Sum Insured: ${formatCurrency(results.buildingsSum)}`,
-        `Buildings Premium: ${formatCurrency(results.buildingsPremium)} (${results.buildingsRate})`,
-        `Household Contents Sum Insured: ${formatCurrency(results.contentsSum)}`,
-        `Household Contents Premium: ${formatCurrency(results.contentsPremium)} (${results.contentsRate})`,
-        `Stamp Duty (5%): ${formatCurrency(results.stampDuty)}`,
-        `Total Premium Due: ${formatCurrency(results.totalPremium)}`,
-        '',
-        `Generated: ${new Date().toLocaleString('en-US')}`,
-      ].join('\n');
+      if (typeof window.html2canvas !== 'function' || !window.jspdf || !window.jspdf.jsPDF) {
+        message.textContent = 'PDF generator failed to load. Please refresh and try again.';
+        return;
+      }
 
-      const blob = new Blob([quoteText], { type: 'text/plain;charset=utf-8' });
-      const downloadUrl = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = downloadUrl;
-      link.download = 'homesure-premium-quote.txt';
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(downloadUrl);
+      const captureNode = document.getElementById('pdfCapture');
+      if (!captureNode) {
+        message.textContent = 'Could not find quote area to export.';
+        return;
+      }
+
+      const originalButtonText = downloadBtn.textContent;
+      downloadBtn.disabled = true;
+      downloadBtn.textContent = 'Preparing PDF...';
+      message.textContent = '';
+      document.body.classList.add('pdf-exporting');
+
+      Promise.resolve(document.fonts ? document.fonts.ready : null)
+        .then(() => window.html2canvas(captureNode, {
+          backgroundColor: '#ffffff',
+          scale: 2,
+          useCORS: true,
+          logging: false,
+        }))
+        .then((canvas) => {
+          const { jsPDF } = window.jspdf;
+          const pdf = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'a4' });
+
+          const pageWidth = pdf.internal.pageSize.getWidth();
+          const pageHeight = pdf.internal.pageSize.getHeight();
+          const margin = 24;
+
+          const maxWidth = pageWidth - margin * 2;
+          const maxHeight = pageHeight - margin * 2;
+          const widthScale = maxWidth / canvas.width;
+          const heightScale = maxHeight / canvas.height;
+          const scale = Math.min(widthScale, heightScale);
+
+          const renderWidth = canvas.width * scale;
+          const renderHeight = canvas.height * scale;
+          const offsetX = (pageWidth - renderWidth) / 2;
+          const offsetY = margin;
+
+          const imageData = canvas.toDataURL('image/png');
+          pdf.addImage(imageData, 'PNG', offsetX, offsetY, renderWidth, renderHeight, undefined, 'FAST');
+          pdf.save('homesure-premium-quote.pdf');
+        })
+        .catch(() => {
+          message.textContent = 'Could not generate PDF. Please try again.';
+        })
+        .finally(() => {
+          document.body.classList.remove('pdf-exporting');
+          downloadBtn.disabled = false;
+          downloadBtn.textContent = originalButtonText;
+        });
     }
 
     downloadBtn.addEventListener('click', downloadQuote);
