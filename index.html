@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HomeSure Premium Calculator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      color-scheme: light;
+    }
+
+   
+
+    @media print {
+      body {
+        background: #ffffff !important;
+      }
+
+      .no-print {
+        display: none !important;
+      }
+
+      .print-sheet {
+        box-shadow: none !important;
+        border: 1px solid #e2e8f0;
+      }
+    }
+
+    body {
+      background: linear-gradient(180deg, #ffffff 0%, #f7f8fb 100%);
+    }
+
+    .sheet-shadow {
+      box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+    }
+
+    .logo-mark {
+      filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.08));
+    }
+  </style>
+</head>
+<body class="text-slate-900">
+  <main class="mx-auto flex w-full max-w-6xl flex-col items-center px-4 pb-4 pt-0 sm:px-6 sm:pt-0 lg:px-8 lg:pt-0">
+    <section class="w-full max-w-4xl text-center">
+      <div class="mb-0.5 flex flex-col items-center justify-center gap-0">
+        <img src="Cellinsurance Logo.png" alt="Cell Insurance logo" class="logo-mark h-auto w-56 max-w-full sm:w-64" />
+      </div>
+
+      <h1 class="text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl">
+        Comprehensive HomeSure Premium Calculator (US$)
+      </h1>
+      <p class="mx-auto mt-0.5 max-w-2xl text-sm leading-5 text-slate-500 sm:text-base sm:leading-6">
+        Enter your buildings and household contents sum insured below to instantly calculate your annual home insurance premium quotation.
+      </p>
+    </section>
+
+    <section class="print-sheet mt-3 w-full max-w-4xl rounded-md bg-white sheet-shadow sm:mt-4">
+      <div class="rounded-t-md bg-slate-950 px-5 py-3 text-base font-bold uppercase tracking-wide text-white">
+        Insurance Quotation Sheet
+      </div>
+
+      <div class="border-x border-b border-slate-200">
+        <div class="grid gap-0 border-b border-slate-200 md:grid-cols-2">
+          <div class="bg-slate-50 px-4 py-3">
+            <label for="buildingsInput" class="mb-1.5 block text-sm font-semibold text-slate-900">Buildings Sum Insured</label>
+            <input id="buildingsInput" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0"
+              class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-amber-400 focus:ring-2 focus:ring-amber-200" />
+          </div>
+          <div class="bg-slate-50 px-4 py-3">
+            <label for="contentsInput" class="mb-1.5 block text-sm font-semibold text-slate-900">Household Contents Sum Insured <span class="font-normal text-slate-500">(optional)</span></label>
+            <input id="contentsInput" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0"
+              class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-amber-400 focus:ring-2 focus:ring-amber-200" />
+          </div>
+        </div>
+
+        <div class="no-print border-b border-slate-200 bg-white px-4 py-2">
+          <p id="message" class="text-xs font-medium text-rose-600 sm:text-sm" aria-live="polite"></p>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="min-w-full border-collapse text-left">
+            <thead>
+              <tr class="border-b border-slate-200 bg-slate-100 text-xs font-bold text-slate-900 sm:text-sm">
+                <th class="px-4 py-2.5">Sum Insured</th>
+                <th class="px-4 py-2.5">Cover Type</th>
+                <th class="px-4 py-2.5">Rate</th>
+                <th class="px-4 py-2.5 text-right">Annual Premium</th>
+              </tr>
+            </thead>
+            <tbody class="text-xs text-slate-800 sm:text-sm">
+              <tr class="border-b border-slate-200">
+                <td id="buildingsSumDisplay" class="px-4 py-2.5">US$ 0.00</td>
+                <td class="px-4 py-2.5">Buildings</td>
+                <td id="buildingsRateDisplay" class="px-4 py-2.5">Flat US$ 50</td>
+                <td id="buildingsPremiumDisplay" class="px-4 py-2.5 text-right font-semibold">US$ 0.00</td>
+              </tr>
+              <tr class="border-b border-slate-200">
+                <td id="contentsSumDisplay" class="px-4 py-2.5">US$ 0.00</td>
+                <td class="px-4 py-2.5">Household Contents</td>
+                <td id="contentsRateDisplay" class="px-4 py-2.5">Flat US$ 50</td>
+                <td id="contentsPremiumDisplay" class="px-4 py-2.5 text-right font-semibold">US$ 0.00</td>
+              </tr>
+              <tr class="border-b border-slate-200 bg-white">
+                <td class="px-4 py-2.5 text-slate-700" colspan="3">Stamp Duty (5% of premiums)</td>
+                <td id="stampDutyDisplay" class="px-4 py-2.5 text-right font-semibold">US$ 0.00</td>
+              </tr>
+              <tr class="bg-amber-200/80">
+                <td class="px-4 py-3 text-base font-extrabold uppercase tracking-wide text-slate-950 sm:text-lg" colspan="3">Total Premium Due</td>
+                <td id="totalPremiumDisplay" class="px-4 py-3 text-right text-base font-extrabold text-slate-950 sm:text-lg">US$ 0.00</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="border-t border-slate-200 px-4 py-2 text-xs text-slate-500 sm:text-sm">
+          All values are calculated in US Dollars (US$). This quotation is indicative and subject to underwriting terms.
+        </div>
+
+        <div class="no-print border-t border-slate-200 bg-white px-4 py-3 text-right">
+          <button id="downloadBtn" type="button"
+            class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-900 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-300 sm:text-sm">
+            Download
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const buildingsInput = document.getElementById('buildingsInput');
+    const contentsInput = document.getElementById('contentsInput');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const message = document.getElementById('message');
+
+    const buildingsSumDisplay = document.getElementById('buildingsSumDisplay');
+    const contentsSumDisplay = document.getElementById('contentsSumDisplay');
+    const buildingsRateDisplay = document.getElementById('buildingsRateDisplay');
+    const contentsRateDisplay = document.getElementById('contentsRateDisplay');
+    const buildingsPremiumDisplay = document.getElementById('buildingsPremiumDisplay');
+    const contentsPremiumDisplay = document.getElementById('contentsPremiumDisplay');
+    const stampDutyDisplay = document.getElementById('stampDutyDisplay');
+    const totalPremiumDisplay = document.getElementById('totalPremiumDisplay');
+
+    const defaultState = {
+      buildingsSum: 0,
+      contentsSum: 0,
+      buildingsPremium: 0,
+      contentsPremium: 0,
+      stampDuty: 0,
+      totalPremium: 0,
+      buildingsRate: 'Flat US$ 50',
+      contentsRate: 'Not selected',
+    };
+
+    function formatCurrency(value) {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }).format(value);
+    }
+
+    function parseInput(input, isRequired = true) {
+      const value = input.value.trim();
+      if (value === '') {
+        if (!isRequired) {
+          return { valid: true, value: null };
+        }
+
+        return { valid: false, message: 'Please enter a buildings sum insured value.' };
+      }
+
+      const number = Number(value);
+      if (!Number.isFinite(number) || number < 0) {
+        return { valid: false, message: 'Please enter valid non-negative numbers only.' };
+      }
+
+      return { valid: true, value: number };
+    }
+
+    function getPremiumResults() {
+      const buildings = parseInput(buildingsInput, true);
+      const contents = parseInput(contentsInput, false);
+
+      if (!buildings.valid) {
+        return { valid: false, message: buildings.message };
+      }
+
+      const buildingsSum = buildings.value;
+      const contentsSum = contents.value ?? 0;
+      const hasContents = contents.value !== null;
+
+      const buildingsPremium = buildingsSum <= 50000 ? 50 : buildingsSum * 0.001;
+      const contentsPremium = hasContents ? (contentsSum <= 5000 ? 50 : contentsSum * 0.01) : 0;
+      const stampDuty = 0.05 * (buildingsPremium + contentsPremium);
+      const totalPremium = buildingsPremium + contentsPremium + stampDuty;
+
+      return {
+        valid: true,
+        message: '',
+        buildingsSum,
+        contentsSum,
+        buildingsPremium,
+        contentsPremium,
+        stampDuty,
+        totalPremium,
+        buildingsRate: buildingsSum <= 50000 ? 'Flat US$ 50' : '0.1% of sum insured',
+        contentsRate: hasContents ? (contentsSum <= 5000 ? 'Flat US$ 50' : '1% of sum insured') : 'Not selected',
+      };
+    }
+
+    function renderResults(results) {
+      buildingsSumDisplay.textContent = formatCurrency(results.buildingsSum);
+      contentsSumDisplay.textContent = formatCurrency(results.contentsSum);
+      buildingsRateDisplay.textContent = results.buildingsRate;
+      contentsRateDisplay.textContent = results.contentsRate;
+      buildingsPremiumDisplay.textContent = formatCurrency(results.buildingsPremium);
+      contentsPremiumDisplay.textContent = formatCurrency(results.contentsPremium);
+      stampDutyDisplay.textContent = formatCurrency(results.stampDuty);
+      totalPremiumDisplay.textContent = formatCurrency(results.totalPremium);
+    }
+
+    function calculatePremiums() {
+      const results = getPremiumResults();
+
+      if (!results.valid) {
+        message.textContent = results.message;
+        return null;
+      }
+
+      message.textContent = '';
+      renderResults(results);
+      return results;
+    }
+
+    function downloadQuote() {
+      const results = calculatePremiums();
+      if (!results) {
+        return;
+      }
+
+      const quoteText = [
+        'HomeSure Premium Calculator Quote',
+        '',
+        `Buildings Sum Insured: ${formatCurrency(results.buildingsSum)}`,
+        `Buildings Premium: ${formatCurrency(results.buildingsPremium)} (${results.buildingsRate})`,
+        `Household Contents Sum Insured: ${formatCurrency(results.contentsSum)}`,
+        `Household Contents Premium: ${formatCurrency(results.contentsPremium)} (${results.contentsRate})`,
+        `Stamp Duty (5%): ${formatCurrency(results.stampDuty)}`,
+        `Total Premium Due: ${formatCurrency(results.totalPremium)}`,
+        '',
+        `Generated: ${new Date().toLocaleString('en-US')}`,
+      ].join('\n');
+
+      const blob = new Blob([quoteText], { type: 'text/plain;charset=utf-8' });
+      const downloadUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = 'homesure-premium-quote.txt';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(downloadUrl);
+    }
+
+    downloadBtn.addEventListener('click', downloadQuote);
+
+    [buildingsInput, contentsInput].forEach((input) => {
+      input.addEventListener('input', () => {
+        if (buildingsInput.value.trim() === '' && contentsInput.value.trim() === '') {
+          message.textContent = '';
+          renderResults(defaultState);
+          return;
+        }
+
+        calculatePremiums();
+      });
+    });
+
+    renderResults(defaultState);
+    buildingsInput.focus();
+  </script>
+</body>
+</html>
